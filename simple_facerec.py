@@ -109,11 +109,13 @@ class SimpleFacerec:
 
             # Add the name to the list of names
          
-
-            if age == '(0-2)':
-                age = 'baby'
+            if name=='Unknown':
+                if age == '(0-2)':
+                    age = 'baby'
+                else:
+                    age = 'not baby'
             else:
-                age = 'not baby'
+                age='' 
 
             # Draw a box around the face
             cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 200), 4)
