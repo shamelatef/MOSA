@@ -40,6 +40,8 @@ class SimpleFacerec:
         print("Encoding images loaded")
 
     def detect_known_faces(self, frame):
+        if frame is None or frame.size == 0:
+            return [], []
         small_frame = cv2.resize(frame, (0, 0), fx=self.frame_resizing, fy=self.frame_resizing)
         # Find all the faces and face encodings in the current frame of video
         # Convert the image from BGR color (which OpenCV uses) to RGB color (which face_recognition uses)
