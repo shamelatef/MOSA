@@ -1,13 +1,7 @@
 import cv2
 from simple_facerec import SimpleFacerec
 import time
-from flask import Flask, render_template, Response
 
-app = Flask(__name__)
-@app.route('/')
-def index():
-    # rendering webpage
-    return render_template('index.html')
 
 
 def faceBox(faceNet,frame):
@@ -55,10 +49,10 @@ baby_detected_start_time = 0
 sfr = SimpleFacerec()
 sfr.load_encoding_images("images/")
 
+padding=50
 
-
-def gen_frames():  # generate frames for web display
-    while True:
+ # generate frames for web display
+while True:
         success, frame =video.read()
 
         if not success:
@@ -68,6 +62,14 @@ def gen_frames():  # generate frames for web display
             face_locations, face_names = sfr.detect_known_faces(frame)
             frame,bboxs=faceBox(faceNet,frame)
  
+        
+
+            for face_loc, name in zip(face_locations, face_names):
+                        y1, x2, y2, x1 = face_loc[0], face_loc[1], face_loc[2], face_loc[3]
+
+                        cv2.putText(frame, name,(x1, y1 - 10), cv2.FONT_HERSHEY_DUPLEX, 1, (0, 0, 200), 2)
+                        cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 200), 4)
+
 
             for bbox in bboxs:
                             face = frame[max(0,bbox[1]-padding):min(bbox[3]+padding,frame.shape[0]-1),max(0,bbox[0]-padding):min(bbox[2]+padding, frame.shape[1]-1)]
@@ -96,37 +98,13 @@ def gen_frames():  # generate frames for web display
 
                             cv2.rectangle(frame,(bbox[0], bbox[1]-30), (bbox[2], bbox[1]), (0,255,0),-1) 
                             cv2.putText(frame, label, (bbox[0], bbox[1]-10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255,255,255), 2,cv2.LINE_AA)
+            cv2.imshow("Age",frame)
 
-            for face_loc, name in zip(face_locations, face_names):
-                        y1, x2, y2, x1 = face_loc[0], face_loc[1], face_loc[2], face_loc[3]
-
-                        cv2.putText(frame, name,(x1, y1 - 10), cv2.FONT_HERSHEY_DUPLEX, 1, (0, 0, 200), 2)
-                        cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 200), 4)
-
-            ret, buffer = cv2.imencode('.jpg', frame)
-            frame = buffer.tobytes()
-
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')  # concat frame one by one and show result
+            k=cv2.waitKey(1)
+            if k==ord('q'):
+                break
+video.release()
+cv2.destroyAllWindows()
 
 
 
-
-
-@app.route('/baby_detection')
-def baby_detection():
-    # rendering webpage for baby detection
-    return render_template('baby_detection.html')
-
-
-@app.route('/video_feed')
-def video_feed():
-    # return the response generated along with the specific media
-    return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-
-if __name__ == '__main__':
-    # Load Camera
-    #cap = cv2.VideoCapture(0)
-    padding=20
-    app.run(debug=True,host ='0.0.0.0')
