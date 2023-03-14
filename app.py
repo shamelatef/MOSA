@@ -5,7 +5,7 @@ from simple_facerec import SimpleFacerec
 import socket
 
 # Set the IP address and port number of the ESP8266
-ip = '192.168.1.26'
+ip = '192.168.1.4'
 port = 80
 
 # Create a socket object
@@ -92,7 +92,7 @@ while True:
                             age = agePred[0].argmax()
                                                     
                             if age == 0 and name == "Unknown":
-                                s.send(b'1')                                
+                                s.send(b'1')                               
                             
                             if name != previous_name:
                                 if name == "shamel":
@@ -120,3 +120,4 @@ while True:
 s.close()
 video.release()
 cv2.destroyAllWindows()
+
