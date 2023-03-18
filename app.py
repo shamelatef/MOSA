@@ -15,6 +15,20 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 #s.connect((ip, port))
 
 
+from twilio.rest import Client
+
+account_sid = 'ACad3e26bf579655caf7057ade5d30a730'
+auth_token = '67e4e2c57e7cde1e1b303b6c44e74621'
+client = Client(account_sid, auth_token)
+
+whatsapp_number = '+201006623926' 
+
+
+# replace with your phone number in WhatsApp format
+
+
+#201015998603
+
 
 
 
@@ -61,9 +75,10 @@ padding =20
 sfr = SimpleFacerec()
 sfr.load_encoding_images("images/")
 
-
+last_check_time = time.time() - 5  # initialize last check time to 30 seconds ago
 while True:
-        
+        current_time = time.time()
+        time_since_last_check = current_time - last_check_time
         success, frame =video.read()
 
         if not success:
@@ -81,32 +96,35 @@ while True:
 
                     # Check if the face is known or unknown
                     if name != "Unknown":
-                        # Send signal to the ESP8266
-                        if name == "shamel" or name == "amr" or name == "Mestekawy":
-                            #s.send(b'1')
-                            #time.sleep(1)
-                            print("Known")
-                        #else:
-                            #s.send(b'0')
-                    else:
-                        # Perform age detection
-                        ageNet.setInput(blob)
-                        agePred=ageNet.forward()
-                        age = agePred[0].argmax()
+                        #s.send(b'1')
+                        if time_since_last_check >= 5:
+                            # Send message and update the last_detection dictionary for this person
+                            message = client.messages.create(
+                                body=f'{name} face is detected!',
+                                from_='+15075007626', 
+                                to=whatsapp_number
+                            )
+                            last_check_time = current_time
 
-                        # Send signal to the ESP8266 if the age group is a baby
-                        if age == 0:
-                            #s.send(b'0')
-                            print("baby")
-                        else:
-                            #s.send(b'1')
-                            print("notbaby")
+                    else:
+                            # Perform age detection
+                            ageNet.setInput(blob)
+                            agePred=ageNet.forward()
+                            age = agePred[0].argmax()
+
+                            # Send signal to the ESP8266 if the age group is a baby
+                            if age == 0:
+                                #s.send(b'0')
+                                print("baby")
+                            else:
+                                #s.send(b'1')
+                                print("notbaby")
 
                     # Draw the bounding box and label on the frame
                     y1, x2, y2, x1 = face_loc[0], face_loc[1], face_loc[2], face_loc[3]
                     cv2.putText(frame, name,(x1, y1 - 10), cv2.FONT_HERSHEY_DUPLEX, 1, (0, 0, 200), 2)
                     cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 200), 4)
-                    end_time = time.time()
+            end_time = time.time()
             fps = 1 / (end_time - start_time)
             cv2.putText(frame, f"FPS: {round(fps, 2)}", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
 
