@@ -14,7 +14,7 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 # Connect to the ESP8266
 #s.connect((ip, port))
 
-# Send a signal to turn on the LED
+
 
 
 
@@ -109,39 +109,7 @@ while True:
                     end_time = time.time()
             fps = 1 / (end_time - start_time)
             cv2.putText(frame, f"FPS: {round(fps, 2)}", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-                    
 
- 
-            """
-            for bbox,face_loc, name in zip(bboxs,face_locations, face_names):
-                            #print (name)
-                            face = frame[max(0,bbox[1]-padding):min(bbox[3]+padding,frame.shape[0]-1),max(0,bbox[0]-padding):min(bbox[2]+padding, frame.shape[1]-1)]
-                            blob=cv2.dnn.blobFromImage(face, 1.0, (227,227), MODEL_MEAN_VALUES, swapRB=False)
-                            
-
-                            ageNet.setInput(blob)
-                            agePred=ageNet.forward()
-                            age = agePred[0].argmax()
-                                                    
-                            if age == 0 and name == "Unknown":
-                                s.send(b'1')                               
-                            
-                            if name != previous_name:
-                                if name == "shamel":
-                                    s.send(b'1')
-                                    time.sleep(1)
-                                    print("SHAMEL")
-                            else:
-                                s.send(b'0')
-
-                            previous_name = name                                
-
-                            y1, x2, y2, x1 = face_loc[0], face_loc[1], face_loc[2], face_loc[3]                          
-                            cv2.rectangle(frame,(bbox[0], bbox[1]-30), (bbox[2], bbox[1]), (0,255,0),-1) 
-                            #cv2.putText(frame, label, (bbox[0], bbox[1]-10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255,255,255), 2,cv2.LINE_AA)
-                            cv2.putText(frame, name,(x1, y1 - 10), cv2.FONT_HERSHEY_DUPLEX, 1, (0, 0, 200), 2)
-                            cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 200), 4)
-                            """
 
             cv2.imshow("Frame",frame)
             k=cv2.waitKey(1)
