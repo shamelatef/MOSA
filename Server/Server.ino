@@ -15,14 +15,12 @@ WiFiServer server(80); // Create a server object
 WiFiClient client;
 
 
- // Create a client object
 
-// Replace "other_node_ip_address" with the IP address of the other NodeMCU
 
 void setup() {
   pinMode(LED, OUTPUT);
   Serial.begin(115200); // Start the serial communication
-  WiFi.begin("Shamel", "mohamed1");
+  WiFi.begin("OMAR", "12345678");
   Serial.begin(115200); // Starts the serial communication
   pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
   pinMode(echoPin, INPUT); // Sets the echoPin as an Input

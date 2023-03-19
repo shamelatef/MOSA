@@ -12,22 +12,19 @@ port = 80
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # Connect to the ESP8266
-#s.connect((ip, port))
+s.connect((ip, port))
 
 
 from twilio.rest import Client
 
-account_sid = 'ACad3e26bf579655caf7057ade5d30a730'
-auth_token = '67e4e2c57e7cde1e1b303b6c44e74621'
+account_sid = 'ACe22c52b972c41a137d3e0d55481a7990'
+auth_token = '4478c65476229e32ff59a16cc953cefe'
 client = Client(account_sid, auth_token)
 
-whatsapp_number = '+201006623926' 
+whatsapp_number = 'whatsapp:+201006623926' 
 
 
-# replace with your phone number in WhatsApp format
 
-
-#201015998603
 
 
 
@@ -75,7 +72,7 @@ padding =20
 sfr = SimpleFacerec()
 sfr.load_encoding_images("images/")
 
-last_check_time = time.time() - 5  # initialize last check time to 30 seconds ago
+last_check_time = time.time() - 5  # initialize last check time to 5 seconds ago
 while True:
         current_time = time.time()
         time_since_last_check = current_time - last_check_time
@@ -91,20 +88,25 @@ while True:
             face_locations, face_names = sfr.detect_known_faces(frame)
             frame,bboxs=faceBox(faceNet,frame)
             for bbox,face_loc, name in zip(bboxs,face_locations, face_names):
+                    print(name)
+
                     face = frame[max(0,bbox[1]-padding):min(bbox[3]+padding,frame.shape[0]-1),max(0,bbox[0]-padding):min(bbox[2]+padding, frame.shape[1]-1)]
                     blob=cv2.dnn.blobFromImage(face, 1.0, (227,227), MODEL_MEAN_VALUES, swapRB=False)
 
                     # Check if the face is known or unknown
                     if name != "Unknown":
-                        #s.send(b'1')
+                        print("known")
+                        s.send(b'1')
+                       
                         if time_since_last_check >= 5:
                             # Send message and update the last_detection dictionary for this person
                             message = client.messages.create(
                                 body=f'{name} face is detected!',
-                                from_='+15075007626', 
+                                from_='whatsapp:+14155238886', 
                                 to=whatsapp_number
                             )
                             last_check_time = current_time
+                            
 
                     else:
                             # Perform age detection
@@ -114,10 +116,19 @@ while True:
 
                             # Send signal to the ESP8266 if the age group is a baby
                             if age == 0:
-                                #s.send(b'0')
+                                s.send(b'0')
                                 print("baby")
                             else:
-                                #s.send(b'1')
+                                s.send(b'1')
+                                """
+                                if time_since_last_check >= 5:
+                                    message = client.messages.create(
+                                body=f'{name} face is detected!',
+                                from_='whatsapp:+14155238886', 
+                                to=whatsapp_number
+                                )
+                                last_check_time = current_time
+                                """
                                 print("notbaby")
 
                     # Draw the bounding box and label on the frame
