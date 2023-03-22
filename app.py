@@ -76,6 +76,9 @@ sfr.load_encoding_images("images/")
 
 last_check_time = time.time() - 5  # initialize last check time to 5 seconds ago
 
+
+count_not_unknown = 0
+count_unknown=0
 while True:
         current_time = time.time()
         time_since_last_check = current_time - last_check_time
@@ -91,14 +94,17 @@ while True:
             face_locations, face_names = sfr.detect_known_faces(frame)
             frame,bboxs=faceBox(faceNet,frame)
             for bbox,face_loc, name in zip(bboxs,face_locations, face_names):
-                    print(name)
-
                     face = frame[max(0,bbox[1]-padding):min(bbox[3]+padding,frame.shape[0]-1),max(0,bbox[0]-padding):min(bbox[2]+padding, frame.shape[1]-1)]
                     blob=cv2.dnn.blobFromImage(face, 1.0, (227,227), MODEL_MEAN_VALUES, swapRB=False)
 
                     # Check if the face is known or unknown
                     if name != "Unknown":
+                        count_not_unknown +=1
+                    else:
+                        count_not_unknown= 0
+                    if count_not_unknown ==20:
                         print("known")
+                        count_not_unknown =0
                         """
                         s.send(b'1')
                        
@@ -112,14 +118,17 @@ while True:
                             last_check_time = current_time
                             """
 
-                    else:
-                        
+                    if name == "Unknown":
+                            count_unknown+=1
                             # Perform age detection
                             ageNet.setInput(blob)
                             agePred=ageNet.forward()
                             age = agePred[0].argmax()
+                    else:
+                         count_unknown=0
 
-                            # Send signal to the ESP8266 if the age group is a baby
+                    if count_unknown == 20:
+                            count_unknown= 0
                             if age == 0:
                                 #s.send(b'0')
                                 print("baby")
@@ -136,13 +145,13 @@ while True:
                                 last_check_time = current_time
                                 """
 
-                    # Draw the bounding box and label on the frame
+
                     y1, x2, y2, x1 = face_loc[0], face_loc[1], face_loc[2], face_loc[3]
                     cv2.putText(frame, name,(x1, y1 - 10), cv2.FONT_HERSHEY_DUPLEX, 1, (0, 0, 200), 2)
                     cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 200), 4)
             end_time = time.time()
             fps = 1 / (end_time - start_time)
-            cv2.putText(frame, f"FPS: {round(fps, 2)}", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+            cv2.putText(frame, f"FPS: {round(fps, 2)}", (25, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,  255,0), 2)
 
 
             cv2.imshow("Frame",frame)
