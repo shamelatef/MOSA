@@ -5,6 +5,7 @@ from simple_facerec import SimpleFacerec
 import socket
 
 # Set the IP address and port number of the ESP8266
+"""
 ip = '192.168.1.4'
 port = 80
 
@@ -26,7 +27,7 @@ whatsapp_number = 'whatsapp:+201006623926'
 
 
 
-
+"""
 
 
 
@@ -64,8 +65,9 @@ ageNet=cv2.dnn.readNet(ageModel,ageProto)
 
 MODEL_MEAN_VALUES = (78.4263377603, 87.7689143744, 114.895847746)
 ageList = ['(0-2)', '(4-6)', '(8-12)', '(15-20)', '(25-32)', '(38-43)', '(48-53)', '(60-100)']
+URL = "http://192.168.1.103:81/stream"
 
-video=cv2.VideoCapture(0) # The IP address of the esp32 CAM
+video=cv2.VideoCapture(0) 
 padding =20
 
 # Encode faces from a folder
@@ -73,6 +75,7 @@ sfr = SimpleFacerec()
 sfr.load_encoding_images("images/")
 
 last_check_time = time.time() - 5  # initialize last check time to 5 seconds ago
+
 while True:
         current_time = time.time()
         time_since_last_check = current_time - last_check_time
@@ -96,6 +99,7 @@ while True:
                     # Check if the face is known or unknown
                     if name != "Unknown":
                         print("known")
+                        """
                         s.send(b'1')
                        
                         if time_since_last_check >= 5:
@@ -106,9 +110,10 @@ while True:
                                 to=whatsapp_number
                             )
                             last_check_time = current_time
-                            
+                            """
 
                     else:
+                        
                             # Perform age detection
                             ageNet.setInput(blob)
                             agePred=ageNet.forward()
@@ -116,10 +121,11 @@ while True:
 
                             # Send signal to the ESP8266 if the age group is a baby
                             if age == 0:
-                                s.send(b'0')
+                                #s.send(b'0')
                                 print("baby")
                             else:
-                                s.send(b'1')
+                                #s.send(b'1')
+                                print("not baby")
                                 """
                                 if time_since_last_check >= 5:
                                     message = client.messages.create(
@@ -129,7 +135,6 @@ while True:
                                 )
                                 last_check_time = current_time
                                 """
-                                print("notbaby")
 
                     # Draw the bounding box and label on the frame
                     y1, x2, y2, x1 = face_loc[0], face_loc[1], face_loc[2], face_loc[3]
@@ -145,7 +150,7 @@ while True:
             if k==ord('q'):
                 break
 
-s.close()
+#s.close()
 video.release()
 cv2.destroyAllWindows()
 
